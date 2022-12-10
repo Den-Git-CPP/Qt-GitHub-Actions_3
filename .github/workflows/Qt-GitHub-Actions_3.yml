@@ -38,23 +38,17 @@ jobs:
           cd ${{github.workspace}}\build\all\
           windeployqt.exe Qt-GitHub-Actions.exe --release
           ls
-  release-project:
-    name: Release Project
-    runs-on: windows-latest
-    needs: build-programm
-    steps:
-      - name: Check folder
-        run: |
-          cd ${{github.workspace}}\build\all\
-          ls
-      - name:  Check folder2
-        run: ls ${{github.workspace}}\build\all\
       - name: Archive artifact
         uses: thedoctor0/zip-release@main
         with:
           path: ${{github.workspace}}\build\all\
           filename: 'My-artifact.zip'
-
+      
+  release-project:
+    name: Release Project
+    runs-on: windows-latest
+    needs: build-programm
+    steps:
       - name: Create GitHub Release
         id: create-new-release
         uses: actions/create-release@v1
