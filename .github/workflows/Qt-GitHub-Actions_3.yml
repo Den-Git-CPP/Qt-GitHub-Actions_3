@@ -44,11 +44,6 @@ jobs:
           path: ${{github.workspace}}\build\all\
           filename: 'My-artifact.zip'
       
-  release-project:
-    name: Release Project
-    runs-on: windows-latest
-    needs: build-programm
-    steps:
       - name: Create GitHub Release
         id: create-new-release
         uses: actions/create-release@v1
