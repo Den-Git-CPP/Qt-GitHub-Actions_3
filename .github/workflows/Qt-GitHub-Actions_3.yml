@@ -46,7 +46,7 @@ jobs:
       - name: Archive artifact
         uses: thedoctor0/zip-release@main
         with:
-          directory: ${{github.workspace}}\build\all\
+          path: ${{github.workspace}}\build\all\
           filename: 'My-artifact.zip'
 
       - name: Create GitHub Release
