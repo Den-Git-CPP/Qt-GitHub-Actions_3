@@ -44,7 +44,9 @@ jobs:
     needs: build-programm
     steps:
       - name: Check folder
-        run: ls
+        run: |
+          cd ${{github.workspace}}\build\all\
+          ls
       - name:  Check folder2
         run: ls ${{github.workspace}}\build\all\
       - name: Archive artifact
