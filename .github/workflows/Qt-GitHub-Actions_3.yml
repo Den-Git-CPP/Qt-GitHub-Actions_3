@@ -1,0 +1,69 @@
+name: Compile and Release Qt6 Project
+on:
+  push:
+    branches: [ "master" ]
+env:
+  QT_VERSION:  "6.2.0"
+  MINGW_ARCH:  "win64_mingw81"
+  MINGW_PATH:  "mingw81_64"
+  BUILD_TYPE:   Release  
+
+jobs:
+  build-programm:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: ${{ env.QT_VERSION }}
+          arch: ${{ env.MINGW_ARCH }}
+          host: 'windows'
+          target: 'desktop'
+          dir: "${{github.workspace}}/qt"
+          install-deps: "true"
+      
+      - name: Configure CMake Project
+        working-directory: ${{github.workspace}}
+        run: cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -G "MinGW Makefiles" -B ${{github.workspace}}/build
+      
+      - name: Build project
+        working-directory: ${{github.workspace}}/build
+        run:  mingw32-make.exe
+        
+      - name: Compress portable program
+        run: |
+          mkdir ${{github.workspace}}\build\all\
+          cp ${{github.workspace}}/build/Qt-GitHub-Actions.exe ${{github.workspace}}\build\all\
+          cd ${{github.workspace}}\build\all\
+          windeployqt.exe Qt-GitHub-Actions.exe --release
+          ls
+  release-project:
+    name: Release Project
+    runs-on: windows-latest
+    needs: build-programm
+    steps:
+      - name: Archive artifact
+        uses: thedoctor0/zip-release@main
+        with:
+          filename: 'My-artifact.zip'
+      - name: Create GitHub Release
+        id: create-new-release
+        uses: actions/create-release@v1
+        env:
+           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.run_number}}
+          release_name: Release ${{ github.run_number }}
+        
+      - name: Upload release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create-new-release.outputs.upload_url }}
+          asset_path: ./My-artifact.zip
+          asset_name: My-artifact-v${{ github.run_number }}.zip
+          asset_content_type: application/zip
+      
+
